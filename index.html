@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>社会テストアプリ</title>
+    <title>Choice4 Test App</title>
     <!-- Google Fonts: M PLUS Rounded 1c -->
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
     <!-- SheetJS (xlsx.js) CDN -->
@@ -49,10 +49,10 @@
             display: none;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             width: 100%;
             height: 100%;
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
             text-align: center;
         }
@@ -62,6 +62,9 @@
         }
 
         /* Screen 1: Upload */
+        #screen-upload {
+            justify-content: center;
+        }
         #upload-btn-label {
             background: white;
             border: 3px dashed var(--accent-color);
@@ -81,45 +84,155 @@
 
         /* Screen 2: Quiz */
         #progress {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
             color: #888;
         }
 
         #question-box {
             background: white;
-            width: 90%;
+            width: 95%;
             max-width: 500px;
-            min-height: 200px;
-            border-radius: 25px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            min-height: 120px;
+            border-radius: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 30px;
+            padding: 20px;
             box-sizing: border-box;
-            margin-bottom: 30px;
-            border: 4px solid #f0f0f0;
+            margin-bottom: 10px;
+            border: 3px solid #f0f0f0;
             position: relative;
         }
 
+        #answer-box {
+            background: #e3f2fd;
+            width: 95%;
+            max-width: 500px;
+            min-height: 60px;
+            border-radius: 15px;
+            display: none; /* 初期は非表示 */
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1976d2;
+            margin: 10px 0;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 2px solid #bbdefb;
+        }
+
         #question-text {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: bold;
             line-height: 1.4;
             word-break: normal;
             overflow-wrap: anywhere;
         }
 
-        #answer-box {
-            font-size: 3.5rem;
-            color: var(--accent-color);
-            margin-bottom: 30px;
+        /* 4択ボタンコンテナ */
+        #choice-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 95%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+
+        .choice-btn {
+            background: white;
+            border: 3px solid #eee;
+            border-bottom: 6px solid #ddd;
+            border-radius: 15px;
+            padding: 15px 10px;
+            font-size: 1.2rem;
             font-weight: bold;
-            min-height: 5rem;
+            color: var(--text-color);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.1s;
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 80px;
+            word-break: break-all;
+        }
+
+        .choice-btn img {
+            max-width: 100%;
+            max-height: 100px;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .choice-btn:active {
+            transform: translateY(3px);
+            border-bottom-width: 3px;
+        }
+
+        .choice-btn.correct {
+            background-color: var(--maru-color);
+            color: white;
+            border-color: #388e3c;
+            border-bottom-color: #2e7d32;
+        }
+
+        .choice-btn.incorrect {
+            background-color: var(--batsu-color);
+            color: white;
+            border-color: #d32f2f;
+            border-bottom-color: #c62828;
+        }
+
+        .choice-btn.practice-hint {
+            border-color: var(--maru-color);
+            border-width: 5px;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .choice-btn.disabled {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        /* 修正待ち状態のボタン制御 */
+        .choice-btn.waiting-correct {
+            pointer-events: auto; /* 正解ボタンだけクリック可能にする */
+        }
+
+        /* 判定オーバーレイ */
+        #judge-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 15rem;
+            font-weight: bold;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            display: none;
+        }
+
+        #judge-overlay.maru {
+            color: var(--maru-color);
+            display: block;
+            animation: popIn 0.6s forwards;
+        }
+
+        #judge-overlay.batsu {
+            color: var(--batsu-color);
+            display: block;
+            animation: popIn 0.6s forwards;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
         }
 
         .big-btn {
@@ -130,29 +243,16 @@
             border-radius: 50px;
             cursor: pointer;
             transition: transform 0.1s;
-            width: 80%;
-            max-width: 300px;
-        }
-
-        .big-btn:active {
-            transform: translateY(4px);
-        }
-
-        #check-btn {
+            width: 100%;
             background-color: var(--accent-color);
             color: white;
             box-shadow: var(--btn-shadow);
             height: 70px;
+            margin-bottom: 20px;
         }
+        .big-btn:active { transform: translateY(4px); }
 
-        .judge-btns {
-            display: none;
-            gap: 20px;
-            width: 100%;
-            justify-content: center;
-        }
-
-        .judge-btn {
+        .judge-btn-big {
             width: 100px;
             height: 100px;
             border-radius: 50%;
@@ -161,28 +261,22 @@
             font-weight: bold;
             color: white;
             cursor: pointer;
-            box-sizing: border-box;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+            transition: transform 0.1s;
         }
-
-        #maru-btn {
-            background-color: var(--maru-color);
-            box-shadow: var(--maru-shadow);
-        }
-
-        #batsu-btn {
-            background-color: var(--batsu-color);
-            box-shadow: var(--batsu-shadow);
-        }
+        .judge-btn-big:active { transform: translateY(4px); }
+        .judge-btn-big.maru { background-color: var(--maru-color); box-shadow: 0 6px 0 #388e3c; }
+        .judge-btn-big.batsu { background-color: var(--batsu-color); box-shadow: 0 6px 0 #d32f2f; }
 
         .secondary-btn {
-            margin-top: 30px;
             background: none;
             border: none;
             color: #888;
-            font-size: 1.1rem;
+            font-size: 1rem;
             text-decoration: underline;
             cursor: pointer;
             padding: 10px;
+            margin-top: 10px;
         }
 
         /* Screen 3: Result */
@@ -190,7 +284,7 @@
             width: 100%;
             flex-grow: 1;
             background: white;
-            margin: 20px 0;
+            margin: 15px 0;
             padding: 15px;
             border-radius: 15px;
             overflow-y: auto;
@@ -211,7 +305,7 @@
             background-color: #06c755;
             color: white;
             width: 100%;
-            height: 70px;
+            height: 60px;
             border: none;
             border-radius: 15px;
             font-size: 1.2rem;
@@ -219,7 +313,7 @@
             box-shadow: 0 4px 0 #05a546;
         }
 
-        /* Modal for Resume */
+        /* Resume Modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -266,60 +360,16 @@
             background: #eee;
             color: #444;
         }
-
-        /* Practice mode */
-        #practice-answer-box {
-            font-size: 3rem;
-            color: var(--accent-color);
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: none;
-        }
-
-        #practice-explanation-box {
-            font-size: 1rem;
-            color: #666;
-            background: #f9f9f9;
-            border-radius: 10px;
-            padding: 10px 16px;
-            margin-bottom: 16px;
-            width: 90%;
-            max-width: 500px;
-            box-sizing: border-box;
-            display: none;
-            text-align: left;
-            line-height: 1.5;
-        }
-
-        #practice-btn {
-            background-color: #9c27b0;
-            color: white;
-            box-shadow: 0 4px 0 #6a1b7a;
-            height: 70px;
-        }
-
-        /* Animation */
-        .fade-in {
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
     </style>
 </head>
 
 <body>
 
+    <div id="judge-overlay">○</div>
+
     <!-- Screen 1: File Selection -->
     <div id="screen-upload" class="screen active">
-        <h1>社会テストアプリ★</h1>
+        <h1>Choice4 Test App★</h1>
         <p>Excelファイルをえらんでね！</p>
         <p style="font-size: 0.8rem; color: #888;">「予定表」シートを読み込みます</p>
         <label id="upload-btn-label" for="file-input">
@@ -334,19 +384,21 @@
         <div id="question-box">
             <div id="question-text">読み込み中...</div>
         </div>
-
         <div id="answer-box"></div>
 
-        <!-- 練習モード用：即時表示の解答と解説 -->
-        <div id="practice-answer-box"></div>
-        <div id="practice-explanation-box"></div>
+        <div id="choice-container">
+            <!-- Buttons generated by JS -->
+        </div>
 
-        <button id="check-btn" class="big-btn">答えあわせ</button>
-        <button id="practice-btn" class="big-btn" style="display:none;">練習しました</button>
-
-        <div class="judge-btns" id="judge-container">
-            <button id="maru-btn" class="judge-btn">○</button>
-            <button id="batsu-btn" class="judge-btn">×</button>
+        <!-- 自己採点モード用 UI -->
+        <div id="self-grade-container" style="display: none; width: 100%; max-width: 500px; flex-direction: column; align-items: center;">
+            <button id="check-ans-btn" class="big-btn">答えを確認</button>
+            <div id="self-judge-btns" style="display: none; gap: 40px; justify-content: center; width: 100%;">
+                <button id="self-maru-btn" class="judge-btn-big maru">○</button>
+                <button id="self-batsu-btn" class="judge-btn-big batsu">×</button>
+            </div>
+            <!-- 不正解時の修正ステップ用 -->
+            <button id="self-correct-btn" class="choice-btn correct waiting-correct" style="display: none; width: 100%; max-width: 300px; margin: 0 auto; height: 80px;"></button>
         </div>
 
         <button id="back-btn" class="secondary-btn" style="display: none;">◀ ひとつ前にもどる</button>
@@ -376,14 +428,16 @@
 
     <script>
         // QUESTIONS_DATA_START
-        const embeddedQuestions = [{"q": "旧石器時代に使用されていた、石を砕いて作られた石器を何といいますか。", "n": 1, "a": "打製石器", "l": "", "practice": false, "p": 1}, {"q": "ナウマンゾウやオオツノジカなどの化石が発見された、長野県の遺跡を答えなさい。", "n": 2, "a": "野尻湖遺跡", "l": "", "practice": false, "p": 1}, {"q": "アメリカのモースが発見した、土器、石器、骨角器などが出土された遺跡を何といいますか。", "n": 3, "a": "大森貝塚", "l": "", "practice": false, "p": 1}, {"q": "縄文時代の人々が住んでいた住居を何といいますか。", "n": 4, "a": "竪穴住居", "l": "", "practice": false, "p": 1}, {"q": "縄文時代の土器と比べた弥生時代の土器の特徴を答えなさい。", "n": 5, "a": "うすくて堅い", "l": "", "practice": false, "p": 1}, {"q": "弥生時代の人々が、収穫した稲を保管していた倉庫の名前を答えなさい。", "n": 6, "a": "高床倉庫", "l": "", "practice": false, "p": 1}, {"q": "近畿地方などで多く発見される、青銅のつりがねのような形をした祭器を何といいますか。", "n": 7, "a": "銅鐸", "l": "", "practice": false, "p": 1}, {"q": "3世紀の半ば頃、中国に使者を送った女王が治めていた国の名前を答えなさい。", "n": 8, "a": "邪馬台国", "l": "", "practice": false, "p": 1}, {"q": "3世紀の半ば頃、『魏志』倭人伝に書かれた女王の名前を答えなさい。", "n": 9, "a": "卑弥呼", "l": "", "practice": false, "p": 1}, {"q": "紀元前1世紀から紀元後7世紀ごろまでの日本は、中国の歴史書の中では何とよばれていましたか。", "n": 10, "a": "倭", "l": "", "practice": false, "p": 1}, {"q": "大和政権の政治のしくみで、家柄に応じて職位を与える政治のしくみを何といいますか。", "n": 11, "a": "氏姓制度", "l": "", "practice": false, "p": 1}, {"q": "『土佐日記』の作者の名を答えなさい。", "n": 12, "a": "紀貫之", "l": "", "practice": false, "p": 1}, {"q": "藤原氏の全盛期を築いた父子のうち、子が宇治に建てた阿弥陀堂を何といいますか。", "n": 13, "a": "平等院鳳凰堂", "l": "", "practice": false, "p": 1}, {"q": "貴族の女性の正装で、何枚もの単衣とよばれる着物を重ね着したものを何といいますか。", "n": 14, "a": "十二単", "l": "", "practice": false, "p": 1}, {"q": "国ごとに置かれ、軍事や警察を担った役人を何といいますか。", "n": 15, "a": "守護", "l": "", "practice": false, "p": 1}, {"q": "鎌倉幕府の将軍の血筋が絶えた後、北条氏がついた将軍を補佐する役職を何といいますか。", "n": 16, "a": "執権", "l": "", "practice": false, "p": 1}, {"q": "1274年に、中国が高麗を従えて日本の北九州に攻めてきた事件を何といいますか。", "n": 17, "a": "文永の役", "l": "", "practice": false, "p": 1}, {"q": "1281年に、再び中国が高麗を従えて日本の北九州に攻めてきた事件を何といいますか。", "n": 18, "a": "弘安の役", "l": "", "practice": false, "p": 1}, {"q": "1274年と1281年に北九州に元軍が攻めてきた事件をあわせて何といいますか。", "n": 19, "a": "元寇", "l": "", "practice": false, "p": 1}, {"q": "室町幕府の3代将軍が現在の鹿苑寺に建てさせた豪華な別荘を何といいますか。", "n": 20, "a": "金閣", "l": "", "practice": false, "p": 1}, {"q": "鎌倉時代、市は月に何回開かれていましたか。また、室町時代になると月に何回に増えましたか。", "n": 21, "a": "鎌倉時代 3回 室町時代 6回", "l": "", "practice": false, "p": 1}, {"q": "1488年に、浄土真宗の信者たちが北陸で起こした反乱を何といいますか。", "n": 22, "a": "加賀の一向一揆", "l": "", "practice": false, "p": 1}, {"q": "1639年に鎖国を完成させた将軍はだれですか。", "n": 23, "a": "徳川家光", "l": "", "practice": false, "p": 1}, {"q": "東海道の様子を生き生きと描いた「東海道五十三次」の作者はだれですか。", "n": 24, "a": "歌川広重（安藤広重）", "l": "", "practice": false, "p": 1}, {"q": "幕末当時の最大の貿易相手国を答えなさい。", "n": 25, "a": "イギリス", "l": "", "practice": false, "p": 1}, {"q": "政府の方針に協力させるために、1940年に政党を解散してつくられたものは何ですか。", "n": 26, "a": "大政翼賛会", "l": "", "practice": false, "p": 1}, {"q": "1939年に、第二次世界大戦が開戦した時のドイツの指導者はだれですか。", "n": 27, "a": "ヒトラー", "l": "", "practice": false, "p": 1}, {"q": "1944年にアメリカ軍に占領された、本土空襲のきっかけとなった島の名前を答えなさい。", "n": 28, "a": "サイパン島", "l": "", "practice": false, "p": 1}, {"q": "教育の民主化のために1947年に定められた法律は何ですか。", "n": 29, "a": "教育基本法", "l": "", "practice": true, "p": 1}, {"q": "1965年に韓国との間で締結された条約を何といいますか。", "n": 30, "a": "日韓基本条約", "l": "", "practice": true, "p": 1}, {"q": "1016年に藤原道長が摂政になった。平等院鳳凰堂を建てた息子は誰？", "n": 31, "a": "藤原頼通", "l": "", "practice": true, "p": 1}, {"q": "1159年に平治の乱が起きた。負けた源氏の武将は誰？", "n": 32, "a": "源義朝", "l": "", "practice": true, "p": 1}, {"q": "1232年に御成敗式目が定められた。当時の執権は？", "n": 33, "a": "北条泰時", "l": "", "practice": false, "p": 1}, {"q": "1274年に文永の役が起きた。元の皇帝は？", "n": 34, "a": "フビライ・ハン", "l": "", "practice": false, "p": 1}, {"q": "1281年に弘安の役が起きた。当時の執権は？", "n": 35, "a": "北条時宗", "l": "", "practice": false, "p": 1}, {"q": "1333年に鎌倉幕府が滅亡し建武の新政が始まった。建武の新政をおこなった天皇は？", "n": 36, "a": "後醍醐天皇", "l": "", "practice": false, "p": 1}, {"q": "1338年に室町幕府が成立した。初代将軍は？", "n": 37, "a": "足利尊氏", "l": "", "practice": false, "p": 1}, {"q": "1392年に南北朝が合一した。当時の将軍は？", "n": 38, "a": "足利義満", "l": "", "practice": false, "p": 1}, {"q": "1428年に正長の土一揆が起きた。中心となった運送業者は？", "n": 39, "a": "馬借", "l": "", "practice": false, "p": 1}, {"q": "1467年に応仁の乱が起きた。当時の将軍は？", "n": 40, "a": "足利義政", "l": "", "practice": false, "p": 1}, {"q": "1485年に山城の国一揆が起きた。現在の都道府県のどこで起きた？", "n": 41, "a": "京都府", "l": "", "practice": false, "p": 1}, {"q": "1488年に加賀の一向一揆が起きた。現在の都道府県のどこで起きた？", "n": 42, "a": "石川県", "l": "", "practice": false, "p": 1}, {"q": "1543年に鉄砲が伝来した。どこの国から伝わった？", "n": 43, "a": "ポルトガル", "l": "", "practice": false, "p": 1}, {"q": "1549年にキリスト教が伝来した。伝えた人物は？", "n": 44, "a": "フランシスコ・ザビエル", "l": "", "practice": false, "p": 1}, {"q": "1560年に桶狭間の戦いが起きた。敗れたのは誰？", "n": 45, "a": "今川義元", "l": "", "practice": false, "p": 1}, {"q": "1573年に室町幕府が滅亡した。最後の将軍は？", "n": 46, "a": "足利義昭", "l": "", "practice": false, "p": 1}, {"q": "1575年に長篠の戦いが起きた。敗れたのは誰？", "n": 47, "a": "武田勝頼", "l": "", "practice": false, "p": 1}];
+        const embeddedQuestions = [{"q": "古墳の頂上や周囲に埋められた、素焼きの人形などのことを何といいますか。", "n": 1, "a": "埴輪", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "古墳時代に大陸から渡ってきた人々のことを何といいますか。", "n": 2, "a": "渡来人", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "701年に定められたきまりをつくった、蘇我氏を滅ぼした人物の子はだれですか。", "n": 3, "a": "藤原不比等", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "723年に定められた、土地に関する法律を何といいますか。", "n": 4, "a": "三世一身の法", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "総国分寺にある、天皇の遺品を収めた倉庫の建築様式を何といいますか。", "n": 5, "a": "校倉造", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "奈良時代中期の、唐の強い影響を受けた仏教文化を何文化といいますか。", "n": 6, "a": "天平文化", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1192年、征夷大将軍に任じられた人物名を答えなさい。", "n": 7, "a": "源頼朝", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "東大寺南大門や円覚寺舎利殿などに代表される、力強く素朴な武士の文化を何といいますか。", "n": 8, "a": "鎌倉文化", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "室町幕府の政治のしくみのうえで、将軍を補佐する立場にあったのは何という役職ですか。", "n": 9, "a": "管領", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "室町幕府の3代将軍のころの文化を何文化といいますか。", "n": 10, "a": "北山文化", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1428年に、現在の滋賀県で発生した農民たちの反乱を何といいますか。", "n": 11, "a": "正長の土一揆", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1485年に、現在の京都で国人といわれる土着の武士が中心になって起こした反乱を何といいますか。", "n": 12, "a": "山城の国一揆", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "室町幕府の8代将軍を答えなさい。", "n": 13, "a": "足利義政", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "足利義政の後継ぎ問題が発展して、1467年から始まった争いを何といいますか。", "n": 14, "a": "応仁の乱", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "足利義満が保護した、面をつけて舞う芸能を何といいますか。", "n": 15, "a": "能", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "面をつけて舞う芸能を大成させた父子のうち、子の名前を答えなさい。", "n": 16, "a": "世阿弥", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "畳や明障子、床の間などが特徴である禅宗様式の家の造りを何といいますか。", "n": 17, "a": "書院造", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "室町時代に自治を行った農村で、名主を中心に一揆の相談などを行った会議を何といいますか。", "n": 18, "a": "寄合", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "19世紀初めごろ、江戸を中心に栄えたこっけいや皮肉などを楽しむ町人文化を何文化といいますか。", "n": 19, "a": "化政文化", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "アメリカ船を幕府が追い払った事件を批判した高野長英・渡辺崋山が処罰された出来事を何といいますか。", "n": 20, "a": "蛮社の獄", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "普通選挙を求めて運動を起こし、のちに「憲政の神様」とよばれた人物はだれですか。", "n": 21, "a": "尾崎行雄", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1919年に締結された第一次世界大戦の講和条約を何といいますか。", "n": 22, "a": "ベルサイユ条約", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "教育の民主化のために1947年に定められた法律は何ですか。", "n": 23, "a": "教育基本法", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1965年に韓国との間で締結された条約を何といいますか。", "n": 24, "a": "日韓基本条約", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1016年に藤原道長が摂政になった。平等院鳳凰堂を建てた息子は誰？", "n": 25, "a": "藤原頼通", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1159年に平治の乱が起きた。負けた源氏の武将は誰？", "n": 26, "a": "源義朝", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1582年に本能寺の変が起きた。裏切ったのは誰？", "n": 27, "a": "明智光秀", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1590年に豊臣秀吉が天下統一した。破ったのは何城の何氏？", "n": 28, "a": "小田原城の北条氏", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1592年に文禄の役が起きた。どの国に攻め込んだ？", "n": 29, "a": "朝鮮", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1597年に慶長の役が起きた。何戦争とも呼ばれる？", "n": 30, "a": "焼き物戦争", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1600年に関ヶ原の戦いが起きた。西軍を率いたのは誰？", "n": 31, "a": "石田三成", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1603年に江戸幕府が成立した。初代将軍は？", "n": 32, "a": "徳川家康", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1615年に大阪夏の陣・武家諸法度が定められた。当時の将軍は？", "n": 33, "a": "徳川秀忠", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1635年に参勤交代が制度化された。五街道の出発地点は？", "n": 34, "a": "日本橋", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1637年に島原・天草一揆が起きた。中心人物は誰？", "n": 35, "a": "天草四郎", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1639年にポルトガル船来航が禁止された。キリスト教排除のために強化されたのは？", "n": 36, "a": "絵踏", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1792年にラクスマンが来航した。どこに来た？", "n": 37, "a": "根室", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1837年に大塩平八郎の乱が起きた。どこで起きた？", "n": 38, "a": "大阪", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1853年にペリーが来航した。どこに来た？", "n": 39, "a": "浦賀", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1854年に日米和親条約が結ばれた。開港した港は？", "n": 40, "a": "下田・函館", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1858年に日米修好通商条約が結ばれた。アメリカ総領事は誰？", "n": 41, "a": "ハリス", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1867年に大政奉還が行われた。最後の将軍は？", "n": 42, "a": "徳川慶喜", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1868年に五箇条の御誓文が出された。何戦争のさなかに出された？", "n": 43, "a": "戊辰戦争", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1869年に版籍奉還が行われた。古代の何と似ている？", "n": 44, "a": "公地公民", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1871年に廃藩置県が行われた。何国家を目指して？", "n": 45, "a": "中央集権国家", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1873年に徴兵令が出された。同年、国の財政安定のため出されたのは？", "n": 46, "a": "地租改正", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1874年に民選議院設立建白書が提出された。提出したのは誰？", "n": 47, "a": "板垣退助", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1877年に西南戦争が起きた。中心人物は誰？", "n": 48, "a": "西郷隆盛", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1885年に内閣制度が創設された。初代内閣総理大臣は？", "n": 49, "a": "伊藤博文", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1889年に大日本帝国憲法が発布された。当時の内閣総理大臣は？", "n": 50, "a": "黒田清隆", "t": "", "choices": [], "practice": false, "p": 1}, {"q": "1890年に第一回帝国議会が開かれた。何院と何院？", "n": 51, "a": "衆議院・貴族院", "t": "", "choices": [], "practice": false, "p": 1}];
         // QUESTIONS_DATA_END
 
         let questions = [];
         let currentIndex = 0;
         let results = [];
+        let isJudging = false;
+        let isWaitingForCorrection = false;
 
-        const STORAGE_KEY = 'kanji_test_progress';
+        const STORAGE_KEY = 'shakai_4taku_progress';
 
         const fileInput = document.getElementById('file-input');
         const screenUpload = document.getElementById('screen-upload');
@@ -392,25 +446,23 @@
 
         const questionText = document.getElementById('question-text');
         const answerBox = document.getElementById('answer-box');
-        const checkBtn = document.getElementById('check-btn');
-        const practiceBtn = document.getElementById('practice-btn');
-        const practiceAnswerBox = document.getElementById('practice-answer-box');
-        const practiceExplanationBox = document.getElementById('practice-explanation-box');
+        const choiceContainer = document.getElementById('choice-container');
+        const selfGradeContainer = document.getElementById('self-grade-container');
+        const selfJudgeBtns = document.getElementById('self-judge-btns');
+        const checkAnsBtn = document.getElementById('check-ans-btn');
+        const selfMaruBtn = document.getElementById('self-maru-btn');
+        const selfBatsuBtn = document.getElementById('self-batsu-btn');
+        const selfCorrectBtn = document.getElementById('self-correct-btn');
         const backBtn = document.getElementById('back-btn');
-        const judgeContainer = document.getElementById('judge-container');
         const progressText = document.getElementById('progress');
         const resultArea = document.getElementById('result-area');
         const resumeModal = document.getElementById('resume-modal');
+        const judgeOverlay = document.getElementById('judge-overlay');
 
-        // Initial check for embedded data
         window.addEventListener('DOMContentLoaded', () => {
-            console.log("Check embedded questions...");
             if (typeof embeddedQuestions !== 'undefined' && embeddedQuestions && Array.isArray(embeddedQuestions) && embeddedQuestions.length > 0) {
-                console.log("Found embedded questions:", embeddedQuestions.length);
                 questions = embeddedQuestions;
                 checkResume();
-            } else {
-                console.log("No embedded questions found.");
             }
         });
 
@@ -435,19 +487,14 @@
                         return;
                     }
                 } catch (e) {
-                    console.error("Resume error:", e);
-                    clearProgress ();
-                 }
+                    clearProgress();
+                }
             }
             startQuiz(true);
         }
 
-         function  saveProgress() {
-            const state = {
-                index: currentIndex,
-                results: results,
-                total: questions.length
-            };
+        function saveProgress() {
+            const state = { index: currentIndex, results: results, total: questions.length };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         }
 
@@ -455,7 +502,6 @@
             localStorage.removeItem(STORAGE_KEY);
         }
 
-        // RGB Color Priority logic
         function getColorPriority(cell) {
             if (!cell || !cell.s || !cell.s.fgColor || !cell.s.fgColor.rgb) return 5;
             let rgb = cell.s.fgColor.rgb;
@@ -465,7 +511,7 @@
             if (r >= 180 && g < 100 && b < 100) return 1;
             if (r >= 180 && g >= 180 && b < 100) return 2;
             if (g >= 150 && r < 150 && b < 150) return 3;
-            if (b >= 150 && r < 150 && (g < 200 || (r < 100 && g > 150 && b > 200))) return 4;
+            if (b >= 150 && r < 150) return 4;
             return 5;
         }
 
@@ -475,138 +521,226 @@
             const reader = new FileReader();
             reader.onload = (event) => {
                 const data = new Uint8Array(event.target.result);
-                const workbook = XLSX.read(data, {
-                    type: 'array',
-                    cellStyles: true
-                });
+                const workbook = XLSX.read(data, { type: 'array', cellStyles: true });
                 const worksheet = workbook.Sheets["予定表"];
-                if (!worksheet) {
-                    alert("「予定表」シートが見つかりませんでした。");
-                    return;
-                }
+                if (!worksheet) { alert("「予定表」シートが見つかりませんでした。"); return; }
                 const range = XLSX.utils.decode_range(worksheet['!ref']);
                 let rawData = [];
-                for (let r = range.s.r; r <= range.e.r; r++) {
-                    const cellI = worksheet[XLSX.utils.encode_cell({ r: r, c: 8 })],
-                        cellJ = worksheet[XLSX.utils.encode_cell({ r: r, c: 9 })],
-                        cellK = worksheet[XLSX.utils.encode_cell({ r: r, c: 10 })],
-                        cellL = worksheet[XLSX.utils.encode_cell({ r: r, c: 11 })],
-                        cellQ = worksheet[XLSX.utils.encode_cell({ r: r, c: 16 })];
+                for (let r = range.s.r + 1; r <= range.e.r; r++) {
+                    const cellI = worksheet[XLSX.utils.encode_cell({ r: r, c: 8 })], // Question
+                        cellJ = worksheet[XLSX.utils.encode_cell({ r: r, c: 9 })],  // Number
+                        cellK = worksheet[XLSX.utils.encode_cell({ r: r, c: 10 })], // Answer
+                        cellL = worksheet[XLSX.utils.encode_cell({ r: r, c: 11 })], // Choices
+                        cellM = worksheet[XLSX.utils.encode_cell({ r: r, c: 12 })], // Type
+                        cellR = worksheet[XLSX.utils.encode_cell({ r: r, c: 17 })]; // Q_Value
+                    
                     if (!cellI || !cellK) continue;
-                    const q = cellI.v,
-                        numVal = cellJ ? cellJ.v : 0,
-                        num = isNaN(parseInt(numVal)) ? 0 : parseInt(numVal),
-                        a = cellK.v,
-                        l = cellL ? String(cellL.v).trim() : "",
-                        qVal = cellQ ? cellQ.v : null,
+                    const q = cellI.v, a = cellK.v,
+                        c_val = cellL ? String(cellL.v).trim() : "",
+                        type_val = cellM ? String(cellM.v).trim() : "4択",
+                        qVal = cellR ? cellR.v : null,
                         practice = (qVal !== null && String(qVal).trim() === "0");
-                    if (!q || !a || q === "問題文" || a === "解答") continue;
+                    
+                    if (!cellJ || cellJ.v === undefined || cellJ.v === null) continue;
+                    let num = parseInt(cellJ.v);
+                    if (isNaN(num)) continue;
+                    if (!q || !a || q === "問題文") continue;
+                    
                     rawData.push({
-                        q: q,
-                        n: num,
-                        a: a,
-                        l: l,
-                        practice: practice,
-                        p: getColorPriority(cellI)
+                        q: q, n: num, a: a, t: type_val,
+                        choices: c_val ? c_val.split(/[、\n]/).map(s => s.trim()).filter(s => s) : [],
+                        practice: practice, p: getColorPriority(cellI)
                     });
                 }
                 questions = rawData.sort((a, b) => (a.p !== b.p) ? a.p - b.p : a.n - b.n);
-                if (questions.length === 0) {
-                    alert("問題が見つかりませんでした。");
-                    return;
-                }
+                if (questions.length === 0) { alert("問題が見つかりませんでした。"); return; }
                 startQuiz(true);
             };
             reader.readAsArrayBuffer(file);
         });
 
         function startQuiz(reset = true) {
-            if (reset) {
-                currentIndex = 0;
-                results = [];
-                clearProgress();
-            }
+            if (reset) { currentIndex = 0; results = []; clearProgress(); }
             screenUpload.classList.remove('active');
             screenQuiz.classList.add('active');
             showQuestion();
         }
 
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
         function showQuestion() {
             if (!questions || questions.length === 0) return;
+            isJudging = false;
+            isWaitingForCorrection = false;
             const q = questions[currentIndex];
             progressText.innerText = `${currentIndex + 1} / ${questions.length}`;
-            // 問題文に画像ファイル名が含まれている場合の処理
-            const imageMatch = q.q.match(/[a-zA-Z0-9_-]+\.(jpg|jpeg|png|gif|webp)/i);
-            if (imageMatch) {
-                const imgFilename = imageMatch[0];
-                const cleanText = q.q.replace(imgFilename, '').trim();
-                questionText.innerHTML = `${cleanText}<br><img src="image/${imgFilename}" style="max-width:100%; height:auto; margin-top:10px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1);">`;
-            } else {
-                questionText.innerText = q.q;
-            }
             
-            // 文字数に応じてフォントサイズを動的に変更
-            const len = q.q.length;
-            if (len < 15) {
-                questionText.style.fontSize = "2.5rem";
-            } else if (len < 30) {
-                questionText.style.fontSize = "1.8rem";
-            } else if (len < 60) {
-                questionText.style.fontSize = "1.4rem";
-            } else {
-                questionText.style.fontSize = "1.1rem";
+            // 問題文の画像判定と表示
+            let pureText = q.q;
+            let questionImgHtml = "";
+            const imgMatch = q.q.match(/[a-zA-Z0-9_\-]+\.(jpg|jpeg|png|gif|webp)/i);
+            if (imgMatch) {
+                const imgFile = imgMatch[0];
+                pureText = q.q.replace(imgFile, "").trim();
+                questionImgHtml = `<br><img src="image/${imgFile}" style="max-width:100%; max-height:200px; margin-top:10px; border-radius:10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">`;
             }
-            
-            answerBox.innerText = "";
-            backBtn.style.display = (currentIndex > 0) ? "block" : "none";
 
-            if (q.practice) {
-                // 練習モード：解答・解説を即表示
-                checkBtn.style.display = "none";
-                judgeContainer.style.display = "none";
-                practiceAnswerBox.style.display = "block";
-                practiceAnswerBox.innerText = q.a;
-                if (q.l) {
-                    practiceExplanationBox.style.display = "block";
-                    practiceExplanationBox.innerText = q.l;
+            questionText.innerHTML = pureText + questionImgHtml;
+            
+            const len = pureText.length;
+            questionText.style.fontSize = len < 15 ? "2.2rem" : len < 30 ? "1.6rem" : len < 60 ? "1.3rem" : "1.1rem";
+            
+            choiceContainer.innerHTML = "";
+            backBtn.style.display = (currentIndex > 0) ? "block" : "none";
+            answerBox.innerText = "";
+            answerBox.style.display = "none";
+            judgeOverlay.className = "";
+
+            const isImage = (text) => {
+                if (!text || typeof text !== 'string') return false;
+                return /\.(jpg|jpeg|png|gif|webp)$/i.test(text.trim());
+            };
+
+            const isChoiceMode = (q.t === "4択");
+            
+            if (isChoiceMode) {
+                // 4択モード
+                choiceContainer.style.display = "grid";
+                selfGradeContainer.style.display = "none";
+                
+                let displayChoices = [];
+                if (q.choices && q.choices.length > 0) {
+                    displayChoices = [...q.choices];
+                    if (!displayChoices.includes(q.a)) displayChoices[0] = q.a;
                 } else {
-                    practiceExplanationBox.style.display = "none";
+                    displayChoices = [q.a, "ダミー1", "ダミー2", "ダミー3"];
                 }
-                practiceBtn.style.display = "block";
+                shuffleArray(displayChoices);
+
+                displayChoices.forEach(choiceText => {
+                    const btn = document.createElement('button');
+                    btn.className = 'choice-btn';
+                    btn.setAttribute('data-choice', choiceText);
+                    if (q.practice && choiceText === q.a) btn.classList.add('practice-hint');
+                    
+                    if (isImage(choiceText)) {
+                        const img = document.createElement('img');
+                        img.src = `image/${choiceText.trim()}`;
+                        btn.appendChild(img);
+                    } else {
+                        btn.innerText = choiceText;
+                    }
+                    
+                    btn.onclick = () => handleChoiceClick(choiceText, btn);
+                    choiceContainer.appendChild(btn);
+                });
             } else {
-                // 通常モード
-                checkBtn.style.display = "block";
-                judgeContainer.style.display = "none";
-                practiceAnswerBox.style.display = "none";
-                practiceExplanationBox.style.display = "none";
-                practiceBtn.style.display = "none";
+                // 自己採点モード（空欄または「4択」以外）
+                choiceContainer.style.display = "none";
+                selfGradeContainer.style.display = "flex";
+                checkAnsBtn.style.display = "block";
+                selfJudgeBtns.style.display = "none";
+                selfCorrectBtn.style.display = "none";
+                
+                if (q.practice) {
+                    answerBox.innerText = q.a;
+                    answerBox.style.display = "flex";
+                }
             }
         }
 
-        checkBtn.addEventListener('click', () => {
-            answerBox.innerText = questions[currentIndex].a;
-            checkBtn.style.display = "none";
-            judgeContainer.style.display = "flex";
-        });
-
-        practiceBtn.addEventListener('click', () => {
-            recordResult('練習');
-        });
-
-        backBtn.addEventListener('click', () => {
-            if (currentIndex > 0) {
-                currentIndex--;
-                results.pop();
-                saveProgress();
-                showQuestion();
+        checkAnsBtn.onclick = () => {
+            const q = questions[currentIndex];
+            if (/\.(jpg|jpeg|png|gif|webp)$/i.test(q.a.trim())) {
+                answerBox.innerHTML = `<img src="image/${q.a.trim()}" style="max-height:100px; object-fit:contain;">`;
+            } else {
+                answerBox.innerText = q.a;
             }
-        });
+            answerBox.style.display = "flex";
+            checkAnsBtn.style.display = "none";
+            selfJudgeBtns.style.display = "flex";
+        };
 
-        document.getElementById('maru-btn').addEventListener('click', () => recordResult('○'));
-        document.getElementById('batsu-btn').addEventListener('click', () => recordResult('×'));
+        selfMaruBtn.onclick = () => {
+            if (isJudging) return;
+            isJudging = true;
+            showJudgeOverlay(true);
+            setTimeout(() => {
+                recordResult('○');
+            }, 800);
+        };
+
+        selfBatsuBtn.onclick = () => {
+            if (isJudging) return;
+            isJudging = true;
+            showJudgeOverlay(false);
+            setTimeout(() => {
+                recordResult('×');
+            }, 800);
+        };
+
+        selfCorrectBtn.onclick = () => {
+            if (isWaitingForCorrection) {
+                recordResult('×');
+            }
+        };
+
+        function showJudgeOverlay(isCorrect) {
+            judgeOverlay.innerText = isCorrect ? "○" : "×";
+            judgeOverlay.className = isCorrect ? "maru" : "batsu";
+        }
+
+        function handleChoiceClick(selectedText, btn) {
+            if (isJudging && !isWaitingForCorrection) return;
+            
+            const q = questions[currentIndex];
+            const isCorrect = (selectedText === q.a);
+
+            if (isWaitingForCorrection) {
+                if (isCorrect) {
+                    recordResult('×');
+                    judgeOverlay.className = "";
+                }
+                return;
+            }
+
+            isJudging = true;
+
+            const buttons = choiceContainer.querySelectorAll('.choice-btn');
+            buttons.forEach(b => {
+                const bText = b.getAttribute('data-choice');
+                b.classList.remove('practice-hint');
+                b.classList.add('disabled');
+                if (bText === q.a) {
+                    b.classList.add('correct');
+                    if (!isCorrect) b.classList.add('waiting-correct');
+                } else if (b === btn && !isCorrect) {
+                    b.classList.add('incorrect');
+                }
+            });
+
+            showJudgeOverlay(isCorrect);
+            
+            if (isCorrect) {
+                setTimeout(() => {
+                    recordResult('○');
+                    judgeOverlay.className = "";
+                }, 800);
+            } else {
+                isWaitingForCorrection = true;
+            }
+        }
 
         function recordResult(judge) {
             results.push({
+                n: questions[currentIndex].n,
+                p: questions[currentIndex].p,
                 a: questions[currentIndex].a,
                 j: judge
             });
@@ -625,19 +759,24 @@
             screenResult.classList.add('active');
             let text = "";
             results.forEach(res => {
-                text += `${res.a} ${res.j}\n`;
+                text += `${res.n} ${res.p} ${res.a} ${res.j}\n`;
             });
             resultArea.innerText = text;
         }
 
+        backBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                results.pop();
+                saveProgress();
+                showQuestion();
+            }
+        });
+
         document.getElementById('line-btn').addEventListener('click', () => {
             const text = resultArea.innerText;
             if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => {
-                    openLine(text);
-                }).catch(() => {
-                    fallbackCopy(text);
-                });
+                navigator.clipboard.writeText(text).then(() => openLine(text)).catch(() => fallbackCopy(text));
             } else {
                 fallbackCopy(text);
             }
@@ -648,20 +787,13 @@
             textArea.value = text;
             document.body.appendChild(textArea);
             textArea.select();
-            try {
-                document.execCommand('copy');
-                openLine(text);
-            } catch (e) {
-                alert("コピー失敗");
-            }
+            try { document.execCommand('copy'); openLine(text); } catch (e) { alert("コピー失敗"); }
             document.body.removeChild(textArea);
         }
 
         function openLine(text) {
             window.location.href = `line://msg/text/${encodeURIComponent(text)}`;
-            setTimeout(() => {
-                alert("結果をコピーしました！LINEに貼り付けて送ってください。");
-            }, 500);
+            setTimeout(() => alert("結果をコピーしました！LINEに貼り付けて送ってください。"), 500);
         }
 
         document.getElementById('restart-btn').addEventListener('click', () => {
